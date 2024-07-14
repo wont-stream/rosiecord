@@ -222,6 +222,9 @@ await Shell.run(
 );
 
 for (let i = 0; i <= 3; i++) {
+  const IPA_LINK = Constants.IPA_FETCH_LINK;
+  // Gets just the IPA Name, "Discord_158" or whatever
+  const [, IPA_VERSION] = IPA_LINK.match(/.*Discord(.*)\..*\.ipa/);
   await EntryPoint(
     i,
     `Discord${IPA_VERSION.startsWith("_") ? IPA_VERSION : `_${IPA_VERSION}`}`
