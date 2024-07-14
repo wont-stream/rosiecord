@@ -9,14 +9,18 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+           cache: 'npm'
 
       - name: Ensure main utils are installed
         id: core
         run: brew install coreutils ldid
 
       - name: install package.json
-        id: build
-        run: npm i
+        id: install
+        run: npm ci
 
       - name: Run Main Node Script to Patch Rosiecord
         id: build
