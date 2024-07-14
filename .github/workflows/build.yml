@@ -12,7 +12,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-           cache: 'npm'
+          cache: "pnpm"
+      - uses: pnpm/action-setup@v4
 
       - name: Ensure main utils are installed
         id: core
