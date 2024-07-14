@@ -5,7 +5,6 @@
  * Last updated by Rosie "Acquite" on Thursday 6th July 2023.
  * Required Dependencies: plutil, local-dirs[Fonts, Packs, Icons, Patches{Required, Optional}], Azule, Theos, NodeJS (run `npm i`)
  */
-import "./icon.js";
 import fs from "fs";
 import { Colors, Shell, States, Constants, Divider } from "./constants.js";
 class Main extends Colors {
