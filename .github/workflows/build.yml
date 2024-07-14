@@ -16,10 +16,9 @@ jobs:
         with:
           node-version: 20
           cache: "pnpm"
-
-      - name: Ensure main utils are installed
-        id: core
-        run: brew install coreutils ldid
+      - uses: tecolicom/actions-use-homebrew-tools@v1
+        with:
+          tools: "coreutils ldid"
 
       - name: install package.json
         id: install
