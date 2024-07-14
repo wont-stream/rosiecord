@@ -1,5 +1,5 @@
 /**
- * -~-~-~ Main Rosiecord Patch Script -~-~-~
+ * -~-~-~ Main Discord Patch Script -~-~-~
  * Build to Patch Enmity, Icons, Fonts, and Other Tweaks into the Base Discord IPA.
  * Created by Rosie "Acquite" on Thursday 22nd December 2022.
  * Last updated by Rosie "Acquite" on Thursday 6th July 2023.
@@ -130,7 +130,7 @@ const EntryPoint = async (index, ipaName) => {
         );
         await M.logCurrentState(ipaStates, "Base Font IPAs");
         await Shell.runSilently(
-          `zip -q -r Dist/Rosiecord-${
+          `zip -q -r Dist/Discord-${
             ipaName.split("_")[1]
           }_GGSans-Font.ipa Payload & wait $!`,
           async (stderr, _) => {
@@ -141,15 +141,13 @@ const EntryPoint = async (index, ipaName) => {
         await Shell.runSilently(`rm -rf Payload & wait $!`);
         for (const Font of ipaList.filter((ipa) => ipa !== "GGSans")) {
           await Shell.runSilently(
-            `unzip -qq -o Dist/Rosiecord-${
-              ipaName.split("_")[1]
-            }_GGSans-Font.ipa`
+            `unzip -qq -o Dist/Discord-${ipaName.split("_")[1]}_GGSans-Font.ipa`
           );
           await Shell.runSilently(
             `cp -rf Fonts/ttf/${Font}/* Payload/Discord.app/`
           );
           await Shell.runSilently(
-            `zip -q -r Dist/Rosiecord-${
+            `zip -q -r Dist/Discord-${
               ipaName.split("_")[1]
             }_${Font}-Font.ipa Payload & wait $!`
           );
@@ -363,7 +361,7 @@ const main = async () => {
   });
   await D.logDivider();
   const MAIN_PLIST = `Payload/Discord.app/Info.plist`;
-  const name = "Rosiecord";
+  const name = "Discord";
   await Shell.write(
     `${S.PENDING}${M.CYAN} Replacing Discord's Name To ${M.PINK}\"${name}\".${M.ENDC}\r`
   );
@@ -371,7 +369,7 @@ const main = async () => {
     `plutil -replace CFBundleName -string "${name}" ${MAIN_PLIST} & wait $!`
   );
   await Shell.runSilently(
-    `plutil -replace CFBundleDisplayName -string "Rosiecord" ${MAIN_PLIST} & wait $!`,
+    `plutil -replace CFBundleDisplayName -string "Discord" ${MAIN_PLIST} & wait $!`,
     (stderr) => {
       Shell.write(
         stderr
@@ -433,15 +431,15 @@ const main = async () => {
   );
   if (process.argv[2] == "custom") {
     await Shell.write(
-      `${S.PENDING}${M.CYAN} Setting bundle ID to ${M.PINK}\"com.rosie.rosiecord\"${M.CYAN}...${M.ENDC}\r`
+      `${S.PENDING}${M.CYAN} Setting bundle ID to ${M.PINK}\"com.rosie.Discord\"${M.CYAN}...${M.ENDC}\r`
     );
     await Shell.run(
-      `plutil -replace CFBundleIdentifier -string "com.rosie.rosiecord" ${MAIN_PLIST} & wait $!`,
+      `plutil -replace CFBundleIdentifier -string "com.rosie.Discord" ${MAIN_PLIST} & wait $!`,
       (stderr) => {
         Shell.write(
           stderr
-            ? `${S.FAILURE} An error occurred while settting bundle ID to ${M.PINK}\"com.rosie.rosiecord\"${M.RED}.${M.ENDC}\n`
-            : `${S.SUCCESS} Successfully set bundle ID to ${M.PINK}\"com.rosie.rosiecord\"${M.CYAN}.${M.ENDC}\n`
+            ? `${S.FAILURE} An error occurred while settting bundle ID to ${M.PINK}\"com.rosie.Discord\"${M.RED}.${M.ENDC}\n`
+            : `${S.SUCCESS} Successfully set bundle ID to ${M.PINK}\"com.rosie.Discord\"${M.CYAN}.${M.ENDC}\n`
         );
       }
     );
@@ -474,7 +472,7 @@ const main = async () => {
   // errors.length > 0 && Shell.write(errors);
   const END_TIME = Date.now();
   await Shell.write(
-    `${S.SUCCESS} Successfully built ${M.PINK}Rosiecord${M.GREEN} in ${M.CYAN}${
+    `${S.SUCCESS} Successfully built ${M.PINK}Discord${M.GREEN} in ${M.CYAN}${
       (END_TIME - START_TIME) / 1000
     } seconds${M.GREEN}.`
   );
