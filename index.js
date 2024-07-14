@@ -6,23 +6,12 @@
  * Required Dependencies: plutil, local-dirs[Fonts, Packs, Icons, Patches{Required, Optional}], Azule, Theos, NodeJS (run `npm i`)
  */
 import fs from "fs";
-import { Colors, Shell, States, Constants, Divider } from "./constants.js";
-class Main extends Colors {
+import { Shell, States, Constants, Divider } from "./constants.js";
+class Main {
   constructor(type, outputType) {
     super();
     this.type = type;
     this.outputType = outputType;
-  }
-  format(item, type) {
-    return `${this.PINK}[${this.CYAN}${
-      item.state === "pending" ? "*" : item.state === "success" ? "+" : "-"
-    }${this.PINK}]${
-      item.state === "pending"
-        ? this.CYAN
-        : item.state === "success"
-        ? this.GREEN
-        : this.RED
-    } ${item.name} ${type}`;
   }
   load(path) {
     return JSON.parse(fs.readFileSync(path).toString());
@@ -37,21 +26,9 @@ class Main extends Colors {
     });
     return ipaArray;
   }
-  async logCurrentState(ipaStates, type) {
-    const defaultStates = ipaStates.map((ipaItem) =>
-      this.format(ipaItem, this.type)
-    );
-    const stdout = `${this.BLUE}${type}: [${this.PINK}${defaultStates.join(
-      `${this.CYAN}, ${this.PINK}`
-    )}${this.BLUE}]${this.ENDC}\r`;
-    await Shell.write("\r".repeat(stdout.length));
-    await Shell.write(stdout);
-  }
+  async logCurrentState(ipaStates, type) {}
   async Main(callable) {
     await callable();
-    await Shell.write(
-      `\n${this.GREEN}All ${this.PINK}Base IPAs${this.GREEN} have been successfully packaged with ${this.PINK}${this.outputType}${this.GREEN}. ${this.CYAN}Continuing to the next step...${this.ENDC}\n`
-    );
   }
 }
 class State {
@@ -60,7 +37,7 @@ class State {
     this.name = name;
   }
 }
-class Inject extends Colors {
+class Inject {
   constructor(type, outputType, hasClean, getParam) {
     super();
     this.type = type;
@@ -80,18 +57,6 @@ class Inject extends Colors {
     });
     const stdoutIpas = await M.get(`ls Dist`);
     const tweakStates = requiredPatches.map((ipa) => new State("pending", ipa));
-    const S = new States();
-    await Shell.write(
-      `${this.CYAN}Injecting ${this.PINK}${this.outputType}${this.CYAN} into ${
-        this.PINK
-      }Base IPAs${this.CYAN}. If ${this.hasClean ? "a " : ""}${this.PINK}${
-        this.type
-      }${this.CYAN} has been ${this.GREEN}successfully${
-        this.CYAN
-      } injected in all IPAs, it will look like this: ${this.BLUE}"${
-        S.SUCCESS
-      } ${this.hasClean ? `Example ` : ""}${this.type}${this.BLUE}"\n`
-    );
     await M.logCurrentState(
       tweakStates,
       `Injected ${this.type}${this.hasClean ? "s" : ""}`
@@ -124,9 +89,7 @@ const EntryPoint = async (index, ipaName) => {
         var _a;
         const ipaList = ["GGSans", ...(await M.get("ls Fonts/ttf"))];
         const ipaStates = ipaList.map((ipa) => new State("pending", ipa));
-        await Shell.write(
-          `${M.CYAN}Packaging the ${M.PINK}Base IPAs${M.CYAN}. If an ${M.PINK}IPA${M.CYAN} has been ${M.GREEN}successfully${M.CYAN} packaged, it will look like this: ${M.BLUE}"${M.PINK}[${M.CYAN}+${M.PINK}]${M.GREEN} Example IPA${M.BLUE}"\n`
-        );
+
         await M.logCurrentState(ipaStates, "Base Font IPAs");
         await Shell.runSilently(
           `zip -q -r Dist/Discord-${
@@ -231,69 +194,10 @@ const EntryPoint = async (index, ipaName) => {
       break;
   }
 };
-class Initialiser extends States {
-  async PackageTweak(tweakName, cmd, permanentability) {
-    await Shell.write(
-      `${this.PENDING}${this.PINK} Packaging ${this.CYAN}"${this.PINK}${tweakName}${this.CYAN}"${this.PINK}. ${this.BLUE}This may take a while...${this.ENDC}\r`
-    );
-    process.chdir(`Tweaks/${tweakName}`);
-    let errored;
-    await Shell.runSilently(`rm -rf packages`);
-    await Shell.run(cmd, async (stderr, stdout) => {
-      await Shell.write(
-        stderr
-          ? `${this.FAILURE} An error occured while packaging ${this.PINK}"${this.CYAN}${tweakName}${this.PINK}"${this.RED}.${this.ENDC}\n`
-          : `${this.SUCCESS} Successfully packaged ${this.PINK}"${this.CYAN}${tweakName}${this.PINK}".${this.GREEN} Moving into ${this.PINK}"${this.CYAN}./Patches/${permanentability}/${this.PINK}"${this.GREEN}...${this.ENDC}\n`
-      );
-      errored = stderr;
-    });
-    if (errored) return process.chdir("../..");
-    process.chdir("packages");
-    await Shell.write(
-      `${this.PENDING}${this.PINK} Moving ${this.CYAN}"${this.PINK}${tweakName}${this.CYAN}"${this.PINK} into ${this.PINK}"${this.CYAN}./Patches/${permanentability}/${this.PINK}"${this.PINK}...${this.ENDC}\r`
-    );
-    await Shell.run(
-      `mv $(find . -name "*.deb") ../../../Patches/${permanentability}/${tweakName}.deb`,
-      async (stderr, stdout) => {
-        await Shell.write(
-          stderr
-            ? `${this.FAILURE} An error occured while moving ${this.PINK}"${this.CYAN}${tweakName}${this.PINK}"${this.RED} into ${this.PINK}"${this.CYAN}./Patches/${permanentability}/${this.PINK}"${this.RED}.${this.ENDC}\n`
-            : `${this.SUCCESS} Successfully moved ${this.PINK}"${this.CYAN}${tweakName}${this.PINK}"${this.GREEN} into ${this.PINK}"${this.CYAN}./Patches/${permanentability}/${this.PINK}"${this.GREEN}.${this.ENDC}\n`
-        );
-      }
-    );
-    process.chdir("../../..");
-  }
-  async InitializeAzule() {
-    fs.existsSync("Azule")
-      ? await Shell.write(
-          `${this.SUCCESS}${this.PINK} Azule${this.GREEN} already exists in ${this.PINK}"${this.CYAN}./${this.PINK}"${this.GREEN}...${this.ENDC}\n`
-        )
-      : await (async () => {
-          await Shell.write(
-            `${this.PENDING}${this.PINK} Installing ${this.CYAN}"Azule"${this.PINK}. ${this.BLUE}This may take a while...${this.ENDC}\r`
-          );
-          await Shell.run(
-            `git clone https://github.com/Al4ise/Azule/ & wait $!`,
-            async (stderr, stdout) => {
-              await Shell.write(
-                stderr
-                  ? `${this.FAILURE} An error occured while installing ${this.PINK}"${this.CYAN}Azule${this.PINK}"${this.RED}.${this.ENDC}\n`
-                  : `${this.SUCCESS} Successfully installed ${this.PINK}"${this.CYAN}Azule${this.PINK}"${this.GREEN} into ${this.PINK}"${this.CYAN}./${this.PINK}"${this.GREEN}.${this.ENDC}\n`
-              );
-              await Shell.write(stdout);
-            }
-          );
-        })();
-  }
-}
+
 const main = async () => {
-  const START_TIME = Date.now();
   const M = new Main("Entry", "Entry in file");
-  const S = new States();
   const D = new Divider(25);
-  const Init = new Initialiser();
-  const { version } = M.load("./package.json");
   const IPA_LINK = Constants.IPA_FETCH_LINK;
   // Gets just the IPA Name, "Discord_158" or whatever
   const [, IPA_VERSION] = IPA_LINK.match(/.*Discord(.*)\..*\.ipa/);
@@ -301,135 +205,65 @@ const main = async () => {
     IPA_VERSION.startsWith("_") ? IPA_VERSION : `_${IPA_VERSION}`
   }`;
   await D.logDivider();
-  await Shell.write(
-    `${M.PINK} █▀█ █▀█ █▀ █ █▀▀ █▀▀ █▀█ █▀█ █▀▄\n${M.CYAN} █▀▄ █▄█ ▄█ █ ██▄ █▄▄ █▄█ █▀▄ █▄▀${M.ENDC}\n`
-  );
-  await Shell.write(
-    `${M.PINK}A project written by ${M.CYAN}Rosie${M.BLUE}/${M.CYAN}Acquite${M.ENDC}\n`
-  );
-  await Shell.write(
-    `${M.BLUE}This patcher is on version ${M.PINK}"${M.CYAN}${version}${M.PINK}"${M.ENDC}\n`
-  );
-  await Shell.write(
-    `${M.BLUE}Patching Discord Version ${M.PINK}"${M.CYAN}${IPA_NAME}${M.PINK}"${M.ENDC}\n`
-  );
-  await Shell.write(
-    `${M.BLUE}Patching Link ${M.PINK}"${M.CYAN}${IPA_LINK}${M.PINK}"${M.ENDC}\n`
-  );
-  await Shell.write(
-    `${S.PENDING}${M.RED} Running ${M.PINK}Legacy${M.RED} Patcher.${M.ENDC}\n`
-  );
-  await D.logDivider();
-  await Shell.write(
-    `${S.PENDING}${M.CYAN} Clearing existing ${M.PINK}\"IPAs\"${M.CYAN} in ${M.PINK}\"./Dist\".${M.ENDC}\r`
-  );
+
   await Shell.runSilently(
     `mkdir -p Dist/ & wait $!; rm -rf Dist/* & wait $!; rm -rf Payload & wait $!`,
-    (stderr) => {
-      Shell.write(
-        stderr
-          ? `${S.FAILURE} An error occurred while clearing existing ${M.PINK}\"IPAs\" in ${M.PINK}\"./Dist\".${M.ENDC}\n`
-          : `${S.SUCCESS} Successfully cleared existing ${M.PINK}\"IPAs\"${M.GREEN} in ${M.PINK}\"./Dist\".${M.ENDC}\n`
-      );
-    }
+    (stderr) => {}
   );
-  await Shell.write(
-    `${S.PENDING}${M.CYAN} Downloading ${M.PINK}\"${IPA_NAME}.ipa\"${M.CYAN} into ${M.PINK}\"./Ipas\".${M.ENDC}\r`
-  );
+
   await Shell.runSilently(`mkdir Ipas; rm -rf Ipas/* & wait $!;`);
   await Shell.runSilently(
     `curl ${IPA_LINK} -o Ipas/${IPA_NAME}.ipa`,
-    (stderr) => {
-      Shell.write(
-        stderr
-          ? `${S.FAILURE} An error occurred while downloading ${M.PINK}\"${IPA_NAME}.ipa\" into ${M.PINK}\"./Ipas\".${M.ENDC}\n`
-          : `${S.SUCCESS} Successfully downloaded ${M.PINK}\"${IPA_NAME}.ipa\"${M.GREEN} into ${M.PINK}\"./Ipas\".${M.ENDC}\n`
-      );
-    }
+    (stderr) => {}
   );
   const IPA_DIR = `Ipas/${IPA_NAME}.ipa`;
-  await Shell.write(
-    `${S.SUCCESS} Directory of IPA: ${M.PINK}${IPA_DIR}${M.ENDC}\n`
-  );
-  await Shell.write(
-    `${S.PENDING}${M.CYAN} Unzipping ${M.PINK}\"${IPA_DIR}\"${M.CYAN} into ${M.PINK}\"./Payload\".${M.ENDC}\r`
-  );
-  await Shell.runSilently(`unzip -o ${IPA_DIR} & wait $!`, (stderr) => {
-    Shell.write(
-      stderr
-        ? `${S.FAILURE} An error occurred while unzipping ${M.PINK}\"${IPA_DIR}\".${M.ENDC}\n`
-        : `${S.SUCCESS} Successfully unzipped ${M.PINK}\"${IPA_DIR}\"${M.GREEN} into ${M.PINK}\"./Payload\".${M.ENDC}\n`
-    );
-  });
+
+  await Shell.runSilently(`unzip -o ${IPA_DIR} & wait $!`, (stderr) => {});
   await D.logDivider();
   const MAIN_PLIST = `Payload/Discord.app/Info.plist`;
-  await Shell.write(
-    `${S.PENDING}${M.CYAN} Patching Discord's URL Scheme To ${M.PINK}\"Add Enmity's URL Handler\".${M.ENDC}\r`
-  );
+
   await Shell.runSilently(
     `plutil -insert CFBundleURLTypes.1 -xml "<dict><key>CFBundleURLName</key><string>Enmity</string><key>CFBundleURLSchemes</key><array><string>enmity</string></array></dict>" ${MAIN_PLIST} & wait $!`,
-    (stderr) => {
-      Shell.write(
-        stderr
-          ? `${S.FAILURE} An error occurred while Patching ${M.PINK}\"Discord's URL Scheme\".${M.ENDC}\n`
-          : `${S.SUCCESS} Successfully Patched ${M.PINK}\"Discord's URL Scheme\"${M.GREEN} to ${M.PINK}\./Add Enmity's URL Handler\".${M.ENDC}\n`
-      );
-    }
-  );
-    }
-  // await Shell.write(`${S.PENDING}${M.CYAN} Patching ${M.PINK}\"Discord's Icons\" ${M.CYAN} to ${M.PINK}\"Enmity's Icons\"${M.CYAN}.${M.ENDC}\r`);
-  // await Shell.runSilently(`cp -rf Icons/* Payload/Discord.app/`)
-  // await Shell.runSilently(`plutil -replace CFBundleIcons -xml "<dict><key>CFBundlePrimaryIcon</key><dict><key>CFBundleIconFiles</key><array><string>EnmityIcon60x60</string></array><key>CFBundleIconName</key><string>EnmityIcon</string></dict></dict>" ${MAIN_PLIST} & wait $!`)
-  // await Shell.runSilently(`plutil -replace CFBundleIcons~ipad -xml "<dict><key>CFBundlePrimaryIcon</key><dict><key>CFBundleIconFiles</key><array><string>EnmityIcon60x60</string><string>EnmityIcon76x76</string></array><key>CFBundleIconName</key><string>EnmityIcon</string></dict></dict>" ${MAIN_PLIST} & wait $!`, (stderr) => {
-  //     Shell.write(stderr
-  //         ? `${S.FAILURE} An error occurred while removing Discord's ${M.PINK}\"Supported Device Limits\"${M.RED}.${M.ENDC}\n`
-  //         : `${S.SUCCESS} Successfully Patched ${M.PINK}\"Discord's Icons\"${M.GREEN} to ${M.PINK}\"Enmity's Icons\"${M.GREEN}.${M.ENDC}\n`
-  //     )
-  // })
-  await Shell.write(
-    `${S.PENDING}${M.CYAN} Enabling ${M.PINK}\"UISupportsDocumentBrowser\"${M.CYAN} and ${M.PINK}\"UIFileSharingEnabled\"${M.CYAN}.${M.ENDC}\r`
-  );
-  await Shell.run(
-    `plutil -replace UISupportsDocumentBrowser -bool true ${MAIN_PLIST} & wait $!`
-  );
-  await Shell.run(
-    `plutil -replace UIFileSharingEnabled -bool true ${MAIN_PLIST} & wait $!`,
-    (stderr) => {
-      Shell.write(
-        stderr
-          ? `${S.FAILURE} An error occurred while Enabling ${M.PINK}\"UISupportsDocumentBrowser\"${M.RED} and ${M.PINK}\"UIFileSharingEnabled\"${M.RED}.${M.ENDC}\n`
-          : `${S.SUCCESS} Successfully Enabled ${M.PINK}\"UISupportsDocumentBrowser\"${M.GREEN} and ${M.PINK}\"UIFileSharingEnabled\"${M.GREEN}.${M.ENDC}\n`
-      );
-    }
-  );
-
-  await D.logDivider();
-  for (let i = 0; i <= 3; i++) {
-    await EntryPoint(i, IPA_NAME);
-    await D.logDivider();
-    // await new Promise((resolve) => setTimeout(() => resolve(), 2000));
-  }
-  // await Shell.write(`${S.PENDING}${M.CYAN} Signing ${M.PINK}\"Discord\"${M.CYAN} and signing ${M.PINK}\"Frameworks\"${M.CYAN}.${M.ENDC}\r`);
-  // const errors: any[] = [];
-  // for (const Ipa of await M.get(`ls Dist`)) {
-  //     await Shell.run(`unzip -qq -o Dist/${Ipa}`, (stderr) => stderr && errors.push(stderr));
-  //     await Shell.run(`ldid -S Payload/Discord.app/Discord`, (stderr) => stderr && errors.push(stderr))
-  //     for (const Framework of await M.get('ls Payload/Discord.app/Frameworks/*.dylib')) {
-  //         await Shell.run(`ldid -S ${Framework}`, (stderr) => stderr && errors.push(stderr))
-  //     }
-  //     await Shell.runSilently(`zip -q -r Dist/${Ipa} Payload & wait $!`)
-  //     await Shell.runSilently(`rm -rf Payload & wait $!`)
-  // }
-  // Shell.write(errors.length > 0
-  //     ? `${S.FAILURE} An error occurred while signing ${M.PINK}\"Discord and Frameworks\"${M.RED}.${M.ENDC}\n`
-  //     : `${S.SUCCESS} Successfully signed ${M.PINK}\"Discord\"${M.GREEN} and signed ${M.PINK}\"Frameworks\"${M.GREEN}.${M.ENDC}\n`
-  // )
-  // errors.length > 0 && Shell.write(errors);
-  const END_TIME = Date.now();
-  await Shell.write(
-    `${S.SUCCESS} Successfully built ${M.PINK}Discord${M.GREEN} in ${M.CYAN}${
-      (END_TIME - START_TIME) / 1000
-    } seconds${M.GREEN}.`
+    (stderr) => {}
   );
 };
+// await Shell.runSilently(`cp -rf Icons/* Payload/Discord.app/`)
+// await Shell.runSilently(`plutil -replace CFBundleIcons -xml "<dict><key>CFBundlePrimaryIcon</key><dict><key>CFBundleIconFiles</key><array><string>EnmityIcon60x60</string></array><key>CFBundleIconName</key><string>EnmityIcon</string></dict></dict>" ${MAIN_PLIST} & wait $!`)
+// await Shell.runSilently(`plutil -replace CFBundleIcons~ipad -xml "<dict><key>CFBundlePrimaryIcon</key><dict><key>CFBundleIconFiles</key><array><string>EnmityIcon60x60</string><string>EnmityIcon76x76</string></array><key>CFBundleIconName</key><string>EnmityIcon</string></dict></dict>" ${MAIN_PLIST} & wait $!`, (stderr) => {
+//     Shell.write(stderr
+//         ? `${S.FAILURE} An error occurred while removing Discord's ${M.PINK}\"Supported Device Limits\"${M.RED}.${M.ENDC}\n`
+//         : `${S.SUCCESS} Successfully Patched ${M.PINK}\"Discord's Icons\"${M.GREEN} to ${M.PINK}\"Enmity's Icons\"${M.GREEN}.${M.ENDC}\n`
+//     )
+// })
+
+await Shell.run(
+  `plutil -replace UISupportsDocumentBrowser -bool true ${MAIN_PLIST} & wait $!`
+);
+await Shell.run(
+  `plutil -replace UIFileSharingEnabled -bool true ${MAIN_PLIST} & wait $!`,
+  (stderr) => {}
+);
+
+await D.logDivider();
+for (let i = 0; i <= 3; i++) {
+  await EntryPoint(i, IPA_NAME);
+  await D.logDivider();
+  // await new Promise((resolve) => setTimeout(() => resolve(), 2000));
+}
+// const errors: any[] = [];
+// for (const Ipa of await M.get(`ls Dist`)) {
+//     await Shell.run(`unzip -qq -o Dist/${Ipa}`, (stderr) => stderr && errors.push(stderr));
+//     await Shell.run(`ldid -S Payload/Discord.app/Discord`, (stderr) => stderr && errors.push(stderr))
+//     for (const Framework of await M.get('ls Payload/Discord.app/Frameworks/*.dylib')) {
+//         await Shell.run(`ldid -S ${Framework}`, (stderr) => stderr && errors.push(stderr))
+//     }
+//     await Shell.runSilently(`zip -q -r Dist/${Ipa} Payload & wait $!`)
+//     await Shell.runSilently(`rm -rf Payload & wait $!`)
+// }
+// Shell.write(errors.length > 0
+//     ? `${S.FAILURE} An error occurred while signing ${M.PINK}\"Discord and Frameworks\"${M.RED}.${M.ENDC}\n`
+//     : `${S.SUCCESS} Successfully signed ${M.PINK}\"Discord\"${M.GREEN} and signed ${M.PINK}\"Frameworks\"${M.GREEN}.${M.ENDC}\n`
+// )
+// errors.length > 0 && Shell.write(errors);
+
 await main();
