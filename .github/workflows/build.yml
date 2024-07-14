@@ -15,10 +15,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "pnpm"
+          cache: pnpm
       - uses: tecolicom/actions-use-homebrew-tools@v1
         with:
-          tools: "coreutils ldid"
+          tools: coreutils ldid
           cache: yes
 
       - name: install package.json
@@ -38,7 +38,7 @@ jobs:
       - name: Create release
         uses: marvinpinto/action-automatic-releases@latest
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
           automatic_release_tag: rosiecord_${{ steps.version.outputs.__DISCORD_VERSION }}
           title: Rosiecord ${{ steps.version.outputs.__DISCORD_VERSION }}
