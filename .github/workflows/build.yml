@@ -42,4 +42,4 @@ jobs:
           prerelease: false
           automatic_release_tag: Discord_${{ steps.version.outputs.__DISCORD_VERSION }}
           title: Discord ${{ steps.version.outputs.__DISCORD_VERSION }}
-          files: Dist/Discord-227_Cabin-Font+Plumpy_Icons.ipa
+          files: Dist/Discord-*_Cabin-Font+Plumpy_Icons.ipa
