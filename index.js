@@ -218,13 +218,13 @@ const main = async () => {
   const MAIN_PLIST = `Payload/Discord.app/Info.plist`;
 
   await Shell.runSilently(
-    `plutil -insert CFBundleURLTypes.1 -xml "<dict><key>CFBundleURLName</key><string>Enmity</string><key>CFBundleURLSchemes</key><array><string>enmity</string></array></dict>" ${MAIN_PLIST} & wait $!`,
+    `plutil -insert CFBundleURLTypes.1 -xml "<dict><key>CFBundleURLName</key><string>Enmity</string><key>CFBundleURLSchemes</key><array><string>enmity</string></array></dict>" ${"Payload/Discord.app/Info.plist"} & wait $!`,
     (stderr) => {}
   );
 };
 // await Shell.runSilently(`cp -rf Icons/* Payload/Discord.app/`)
-// await Shell.runSilently(`plutil -replace CFBundleIcons -xml "<dict><key>CFBundlePrimaryIcon</key><dict><key>CFBundleIconFiles</key><array><string>EnmityIcon60x60</string></array><key>CFBundleIconName</key><string>EnmityIcon</string></dict></dict>" ${MAIN_PLIST} & wait $!`)
-// await Shell.runSilently(`plutil -replace CFBundleIcons~ipad -xml "<dict><key>CFBundlePrimaryIcon</key><dict><key>CFBundleIconFiles</key><array><string>EnmityIcon60x60</string><string>EnmityIcon76x76</string></array><key>CFBundleIconName</key><string>EnmityIcon</string></dict></dict>" ${MAIN_PLIST} & wait $!`, (stderr) => {
+// await Shell.runSilently(`plutil -replace CFBundleIcons -xml "<dict><key>CFBundlePrimaryIcon</key><dict><key>CFBundleIconFiles</key><array><string>EnmityIcon60x60</string></array><key>CFBundleIconName</key><string>EnmityIcon</string></dict></dict>" ${"Payload/Discord.app/Info.plist"} & wait $!`)
+// await Shell.runSilently(`plutil -replace CFBundleIcons~ipad -xml "<dict><key>CFBundlePrimaryIcon</key><dict><key>CFBundleIconFiles</key><array><string>EnmityIcon60x60</string><string>EnmityIcon76x76</string></array><key>CFBundleIconName</key><string>EnmityIcon</string></dict></dict>" ${"Payload/Discord.app/Info.plist"} & wait $!`, (stderr) => {
 //     Shell.write(stderr
 //         ? `${S.FAILURE} An error occurred while removing Discord's ${M.PINK}\"Supported Device Limits\"${M.RED}.${M.ENDC}\n`
 //         : `${S.SUCCESS} Successfully Patched ${M.PINK}\"Discord's Icons\"${M.GREEN} to ${M.PINK}\"Enmity's Icons\"${M.GREEN}.${M.ENDC}\n`
@@ -232,10 +232,10 @@ const main = async () => {
 // })
 
 await Shell.run(
-  `plutil -replace UISupportsDocumentBrowser -bool true ${MAIN_PLIST} & wait $!`
+  `plutil -replace UISupportsDocumentBrowser -bool true ${"Payload/Discord.app/Info.plist"} & wait $!`
 );
 await Shell.run(
-  `plutil -replace UIFileSharingEnabled -bool true ${MAIN_PLIST} & wait $!`,
+  `plutil -replace UIFileSharingEnabled -bool true ${"Payload/Discord.app/Info.plist"} & wait $!`,
   (stderr) => {}
 );
 
