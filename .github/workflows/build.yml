@@ -19,6 +19,7 @@ jobs:
       - uses: tecolicom/actions-use-homebrew-tools@v1
         with:
           tools: "coreutils ldid"
+          cache: yes
 
       - name: install package.json
         id: install
