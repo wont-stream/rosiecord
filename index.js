@@ -171,6 +171,7 @@ const EntryPoint = async (index, ipaName) => {
           true,
           "ls Patches/Required"
         ).run(M, async (ipaName, patchName) => {
+          if (ipaName.includes("GGSans")) return;
           await Shell.run(
             `Azule/azule -U -i Dist/${ipaName}.ipa -o Dist -f $PWD/Patches/Required/${patchName} -v & wait $!`
           );
@@ -187,6 +188,7 @@ const EntryPoint = async (index, ipaName) => {
         await new Inject("Pack", "all Icon Packs", true, "ls Packs").run(
           M,
           async (ipaName, patchName) => {
+            if (ipaName.includes("GGSans")) return;
             await Shell.run(`unzip -qq -o Dist/${ipaName}.ipa`);
             await Shell.runSilently(
               `cp -rf Packs/${patchName}/Assets.car Payload/Discord.app/`
@@ -215,6 +217,7 @@ const EntryPoint = async (index, ipaName) => {
           false,
           "ls Patches/Optional"
         ).run(M, async (ipaName, patchName) => {
+          if (ipaName.includes("GGSans")) return;
           await Shell.run(
             `Azule/azule -U -i Dist/${ipaName}.ipa -o Dist -f $PWD/Patches/Optional/${patchName} -v & wait $!`
           );
