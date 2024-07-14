@@ -18,7 +18,7 @@ jobs:
           cache: pnpm
       - uses: tecolicom/actions-use-homebrew-tools@v1
         with:
-          tools: coreutils ldid md5sha1sum
+          tools: coreutils ldid
           cache: yes
 
       - name: install package.json
