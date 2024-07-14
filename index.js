@@ -25,7 +25,6 @@ class Main {
     });
     return ipaArray;
   }
-  async logCurrentState(ipaStates, type) {}
   async Main(callable) {
     await callable();
   }
@@ -55,10 +54,7 @@ class Inject {
     });
     const stdoutIpas = await M.get(`ls Dist`);
     const tweakStates = requiredPatches.map((ipa) => new State("pending", ipa));
-    await M.logCurrentState(
-      tweakStates,
-      `Injected ${this.type}${this.hasClean ? "s" : ""}`
-    );
+
     for (const i in requiredPatches) {
       let patched = 0;
       for (const j in stdoutIpas) {
@@ -72,9 +68,6 @@ class Inject {
           ? (tweakStates.find((patch) => patch.name === patchName).state =
               "success")
           : null;
-        isComplete
-          ? await M.logCurrentState(tweakStates, `Injected ${this.type}s`)
-          : null;
       }
     }
   }
@@ -85,17 +78,15 @@ const EntryPoint = async (index, ipaName) => {
       const M = new Main("IPA", "Different Fonts");
       await M.Main(async () => {
         var _a;
-        const ipaList = ["GGSans", ...(await M.get("ls Fonts/ttf"))];
+        const ipaList = [...(await M.get("ls Fonts/ttf"))];
         const ipaStates = ipaList.map((ipa) => new State("pending", ipa));
 
-        await M.logCurrentState(ipaStates, "Base Font IPAs");
         await Shell.runSilently(
           `zip -q -r Dist/Discord-${
             ipaName.split("_")[1]
           }_GGSans-Font.ipa Payload & wait $!`,
           async (stderr, _) => {
             ipaStates[0].state = stderr ? "failure" : "success";
-            await M.logCurrentState(ipaStates, "Base Font IPAs");
           }
         );
         await Shell.runSilently(`rm -rf Payload & wait $!`);
@@ -117,7 +108,6 @@ const EntryPoint = async (index, ipaName) => {
             ? _a
             : { state: null }
           ).state = "success";
-          await M.logCurrentState(ipaStates, "Base Font IPAs");
         }
       });
       break;
@@ -194,7 +184,6 @@ const EntryPoint = async (index, ipaName) => {
 };
 
 const main = async () => {
-  const M = new Main("Entry", "Entry in file");
   const IPA_LINK = Constants.IPA_FETCH_LINK;
   // Gets just the IPA Name, "Discord_158" or whatever
   const [, IPA_VERSION] = IPA_LINK.match(/.*Discord(.*)\..*\.ipa/);
@@ -203,23 +192,17 @@ const main = async () => {
   }`;
 
   await Shell.runSilently(
-    `mkdir -p Dist/ & wait $!; rm -rf Dist/* & wait $!; rm -rf Payload & wait $!`,
-    (stderr) => {}
+    `mkdir -p Dist/ & wait $!; rm -rf Dist/* & wait $!; rm -rf Payload & wait $!`
   );
 
   await Shell.runSilently(`mkdir Ipas; rm -rf Ipas/* & wait $!;`);
-  await Shell.runSilently(
-    `curl ${IPA_LINK} -o Ipas/${IPA_NAME}.ipa`,
-    (stderr) => {}
-  );
+  await Shell.runSilently(`curl ${IPA_LINK} -o Ipas/${IPA_NAME}.ipa`);
   const IPA_DIR = `Ipas/${IPA_NAME}.ipa`;
 
-  await Shell.runSilently(`unzip -o ${IPA_DIR} & wait $!`, (stderr) => {});
-  const MAIN_PLIST = `Payload/Discord.app/Info.plist`;
+  await Shell.runSilently(`unzip -o ${IPA_DIR} & wait $!`);
 
   await Shell.runSilently(
-    `plutil -insert CFBundleURLTypes.1 -xml "<dict><key>CFBundleURLName</key><string>Enmity</string><key>CFBundleURLSchemes</key><array><string>enmity</string></array></dict>" ${"Payload/Discord.app/Info.plist"} & wait $!`,
-    (stderr) => {}
+    `plutil -insert CFBundleURLTypes.1 -xml "<dict><key>CFBundleURLName</key><string>Enmity</string><key>CFBundleURLSchemes</key><array><string>enmity</string></array></dict>" ${"Payload/Discord.app/Info.plist"} & wait $!`
   );
 };
 // await Shell.runSilently(`cp -rf Icons/* Payload/Discord.app/`)
@@ -235,14 +218,11 @@ await Shell.run(
   `plutil -replace UISupportsDocumentBrowser -bool true ${"Payload/Discord.app/Info.plist"} & wait $!`
 );
 await Shell.run(
-  `plutil -replace UIFileSharingEnabled -bool true ${"Payload/Discord.app/Info.plist"} & wait $!`,
-  (stderr) => {}
+  `plutil -replace UIFileSharingEnabled -bool true ${"Payload/Discord.app/Info.plist"} & wait $!`
 );
 
-await D.logDivider();
 for (let i = 0; i <= 3; i++) {
   await EntryPoint(i, IPA_NAME);
-  await D.logDivider();
   // await new Promise((resolve) => setTimeout(() => resolve(), 2000));
 }
 // const errors: any[] = [];
