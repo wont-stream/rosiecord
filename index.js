@@ -6,10 +6,9 @@
  * Required Dependencies: plutil, local-dirs[Fonts, Packs, Icons, Patches{Required, Optional}], Azule, Theos, NodeJS (run `npm i`)
  */
 import fs from "fs";
-import { Shell, States, Constants, Divider } from "./constants.js";
+import { Shell, Constants } from "./constants.js";
 class Main {
   constructor(type, outputType) {
-    super();
     this.type = type;
     this.outputType = outputType;
   }
@@ -39,7 +38,6 @@ class State {
 }
 class Inject {
   constructor(type, outputType, hasClean, getParam) {
-    super();
     this.type = type;
     this.outputType = outputType;
     this.hasClean = hasClean;
@@ -197,14 +195,12 @@ const EntryPoint = async (index, ipaName) => {
 
 const main = async () => {
   const M = new Main("Entry", "Entry in file");
-  const D = new Divider(25);
   const IPA_LINK = Constants.IPA_FETCH_LINK;
   // Gets just the IPA Name, "Discord_158" or whatever
   const [, IPA_VERSION] = IPA_LINK.match(/.*Discord(.*)\..*\.ipa/);
   const IPA_NAME = `Discord${
     IPA_VERSION.startsWith("_") ? IPA_VERSION : `_${IPA_VERSION}`
   }`;
-  await D.logDivider();
 
   await Shell.runSilently(
     `mkdir -p Dist/ & wait $!; rm -rf Dist/* & wait $!; rm -rf Payload & wait $!`,
@@ -219,7 +215,6 @@ const main = async () => {
   const IPA_DIR = `Ipas/${IPA_NAME}.ipa`;
 
   await Shell.runSilently(`unzip -o ${IPA_DIR} & wait $!`, (stderr) => {});
-  await D.logDivider();
   const MAIN_PLIST = `Payload/Discord.app/Info.plist`;
 
   await Shell.runSilently(
