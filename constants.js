@@ -24,4 +24,4 @@ class Shell {
 class Constants {}
 Constants.IPA_FETCH_LINK =
   "https://ipa.aspy.dev/discord/stable/Discord_226.1.ipa";
-export { Shell, Divider, Constants };
+export { Shell, Constants };
