@@ -222,7 +222,10 @@ await Shell.run(
 );
 
 for (let i = 0; i <= 3; i++) {
-  await EntryPoint(i, IPA_NAME);
+  await EntryPoint(
+    i,
+    `Discord${IPA_VERSION.startsWith("_") ? IPA_VERSION : `_${IPA_VERSION}`}`
+  );
   // await new Promise((resolve) => setTimeout(() => resolve(), 2000));
 }
 // const errors: any[] = [];

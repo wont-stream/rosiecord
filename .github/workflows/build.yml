@@ -9,21 +9,10 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 8
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
       - uses: tecolicom/actions-use-homebrew-tools@v1
         with:
           tools: coreutils ldid
           cache: yes
-
-      - name: install package.json
-        id: install
-        run: pnpm i
 
       - name: Run Main Node Script to Patch Discord
         id: build
