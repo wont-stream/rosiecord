@@ -23,7 +23,7 @@ jobs:
 
       - name: install package.json
         id: install
-        run: pnpm ci
+        run: pnpm i
 
       - name: Run Main Node Script to Patch Rosiecord
         id: build
