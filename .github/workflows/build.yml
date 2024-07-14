@@ -14,15 +14,19 @@ jobs:
         id: core
         run: brew install coreutils ldid
 
+      - name: install package.json
+        id: build
+        run: npm i
+
       - name: Run Main Node Script to Patch Rosiecord
         id: build
         run: node ./index.js
-        
+
       - name: Retrieve version
         id: version
         run: |
           cd ./ipas
-          echo "__DISCORD_VERSION=$(ls | grep Discord | sed -e s/[^0-9.]//g | sed -e s/[/.+?\./]//g)" >> $GITHUB_OUTPUT  
+          echo "__DISCORD_VERSION=$(ls | grep Discord | sed -e s/[^0-9.]//g | sed -e s/[/.+?\./]//g)" >> $GITHUB_OUTPUT
 
       - name: Create release
         uses: marvinpinto/action-automatic-releases@latest
