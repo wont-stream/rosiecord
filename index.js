@@ -363,23 +363,6 @@ const main = async () => {
   });
   await D.logDivider();
   const MAIN_PLIST = `Payload/Discord.app/Info.plist`;
-  const name = "Discord";
-  await Shell.write(
-    `${S.PENDING}${M.CYAN} Replacing Discord's Name To ${M.PINK}\"${name}\".${M.ENDC}\r`
-  );
-  await Shell.runSilently(
-    `plutil -replace CFBundleName -string "${name}" ${MAIN_PLIST} & wait $!`
-  );
-  await Shell.runSilently(
-    `plutil -replace CFBundleDisplayName -string "Discord" ${MAIN_PLIST} & wait $!`,
-    (stderr) => {
-      Shell.write(
-        stderr
-          ? `${S.FAILURE} An error occurred while Replacing ${M.PINK}\"Discord's Name\".${M.ENDC}\n`
-          : `${S.SUCCESS} Successfully Replaced ${M.PINK}\"Discord's Name\"${M.GREEN} to ${M.PINK}\"${name}\".${M.ENDC}\n`
-      );
-    }
-  );
   await Shell.write(
     `${S.PENDING}${M.CYAN} Patching Discord's URL Scheme To ${M.PINK}\"Add Enmity's URL Handler\".${M.ENDC}\r`
   );
@@ -393,17 +376,6 @@ const main = async () => {
       );
     }
   );
-  await Shell.write(
-    `${S.PENDING}${M.CYAN} Removing Discord's ${M.PINK}\"Supported Device Limits\"${M.CYAN}.${M.ENDC}\r`
-  );
-  await Shell.runSilently(
-    `plutil -remove UISupportedDevices ${MAIN_PLIST} & wait $!`,
-    (stderr) => {
-      Shell.write(
-        stderr
-          ? `${S.FAILURE} An error occurred while removing Discord's ${M.PINK}\"Supported Device Limits\"${M.RED}.${M.ENDC}\n`
-          : `${S.SUCCESS} Successfully Removed Discord's ${M.PINK}\"Supported Device Limits\"${M.GREEN}.${M.ENDC}\n`
-      );
     }
   );
   // await Shell.write(`${S.PENDING}${M.CYAN} Patching ${M.PINK}\"Discord's Icons\" ${M.CYAN} to ${M.PINK}\"Enmity's Icons\"${M.CYAN}.${M.ENDC}\r`);
@@ -431,25 +403,7 @@ const main = async () => {
       );
     }
   );
-  if (process.argv[2] == "custom") {
-    await Shell.write(
-      `${S.PENDING}${M.CYAN} Setting bundle ID to ${M.PINK}\"com.rosie.Discord\"${M.CYAN}...${M.ENDC}\r`
-    );
-    await Shell.run(
-      `plutil -replace CFBundleIdentifier -string "com.rosie.Discord" ${MAIN_PLIST} & wait $!`,
-      (stderr) => {
-        Shell.write(
-          stderr
-            ? `${S.FAILURE} An error occurred while settting bundle ID to ${M.PINK}\"com.rosie.Discord\"${M.RED}.${M.ENDC}\n`
-            : `${S.SUCCESS} Successfully set bundle ID to ${M.PINK}\"com.rosie.Discord\"${M.CYAN}.${M.ENDC}\n`
-        );
-      }
-    );
-  }
-  await D.logDivider();
-  await Init.PackageTweak("Flowercord", "gmake package", "Optional");
-  await Init.PackageTweak("SideloadFix", "gmake package", "Required");
-  await Init.InitializeAzule();
+
   await D.logDivider();
   for (let i = 0; i <= 3; i++) {
     await EntryPoint(i, IPA_NAME);
